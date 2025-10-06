@@ -24,6 +24,7 @@ import matplotlib.pyplot as plt
 # Assuming 'train.py' is in the same directory or accessible in the python path
 from train import prepare_data
 from utils.PhysRegMLP import PhysRegMLP
+from utils.PhysMLP import PhysMLP
 from utils.PhysNet import PhysNet
 from utils.support_functions import inverse_transform_temp
 
@@ -51,6 +52,20 @@ def get_model_and_params(model_type: str, depth: int, lambda_value: float = 0.5)
             'lr': 0.001, 'batch_size': 2048, 'lambda_value': lambda_value,
             'encoding_network': {'input_size': 2 * depth, 'fc': [24] * 1, 'output_size': 1, 'activation': 'tanh', 'dropout_rate': 0.01},
             'mdp_network': {'input_size': 5, 'fc': [128] * 1, 'output_size': 2, 'activation': 'tanh', 'dropout_rate': 0.05}
+        }    
+    elif model_type == 'PhysMLP':
+        model_class = PhysMLP
+        network_param = {
+            'lr': 0.001,
+            'batch_size': 2048,
+            'lambda_value': lambda_value,
+            'mdp_network': {
+                'input_size': 4 + 2 * depth,
+                'fc': [64] * 4,
+                'output_size': 3,
+                'activation': ['relu', 'tanh', 'relu', 'tanh'],
+                'dropout_rate': 0.01
+            }
         }
     else:
         raise TypeError(f"Unsupported model type: {model_type}")
@@ -64,7 +79,7 @@ def parse_args() -> argparse.Namespace:
     
     parser.add_argument('--model_path', type=str, required=True,
                         help='Path to the trained model file (.pth). Example: "PhysNet_depth8_seed1.pth"')
-    parser.add_argument('--test_data_path', type=str, default='data/Test_data.csv',
+    parser.add_argument('--test_data_path', type=str, default='data/Training_data.csv',
                         help='Path to the test data CSV file (default: data/Test_data.csv)')
     parser.add_argument('--output_dir', type=str, default='predictions',
                         help='Directory to save the output plot (default: predictions)')
@@ -129,6 +144,9 @@ def main(args: argparse.Namespace):
         predictions_scaled, _ = model_instance.forward(test_inputs)
         predicted_temperatures = inverse_transform_temp(predictions_scaled[:, 0].numpy())
     print("Prediction finished.")
+
+    mse = np.mean((real_temperatures - predicted_temperatures) ** 2)
+    print(f"Mean Squared Error (MSE): {mse:.4f}")
 
     # 5. Plot and save results
     plt.figure(figsize=(16, 8))

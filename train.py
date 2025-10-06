@@ -28,6 +28,7 @@ from utils.support_functions import transform_temp, transform_action, transform_
 from utils.global_state_variables import MAX_TIME
 from utils.PhysNet import PhysNet
 from utils.PhysRegMLP import PhysRegMLP
+from utils.PhysMLP import PhysMLP
 
 # Suppress warnings from PyTorch Lightning about GPU availability, etc.
 warnings.filterwarnings('ignore')
@@ -136,6 +137,20 @@ def get_model_config(args: argparse.Namespace) -> tuple:
                 'dropout_rate': 0.01
             }
         }
+    elif args.model_type == 'PhysMLP':
+        model_class = PhysMLP
+        network_param = {
+            'lr': args.lr,
+            'batch_size': args.batch_size,
+            'lambda_value': args.lambda_2,
+            'mdp_network': {
+                'input_size': 4 + 2 * args.depth,
+                'fc': [64] * 4,
+                'output_size': 3,
+                'activation': ['relu', 'tanh', 'relu', 'tanh'],
+                'dropout_rate': 0.1
+            }
+        }
     elif args.model_type == 'PhysNet':
         model_class = PhysNet
         network_param = {
@@ -170,7 +185,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train a physics-informed neural network model.")
 
     # Model-related arguments
-    parser.add_argument('--model_type', type=str, default='PhysNet', choices=['PhysNet', 'PhysRegMLP'],
+    parser.add_argument('--model_type', type=str, default='PhysRegMLP', choices=['PhysNet','PhysMLP','PhysRegMLP'],
                         help='Type of model to train (default: PhysNet)')
     parser.add_argument('--depth', type=int, default=8,
                         help='Depth of historical data to use for state construction (default: 8)')
@@ -190,8 +205,8 @@ def parse_args() -> argparse.Namespace:
     # Data and path arguments
     parser.add_argument('--data_path', type=str, default='data/Training_data.csv',
                         help='Path to the training data CSV file (default: data/Training_data.csv)')
-    parser.add_argument('--output_path_template', type=str, default='models/{model_type}_depth{depth}_seed{seed}.pth',
-                        help='Template for the output path to save the trained model (default: {model_type}_depth{depth}_seed{seed}.pth)')
+    parser.add_argument('--output_path_template', type=str, default='models/{model_type}_depth{depth}_epochs{epochs}_seed{seed}.pth',
+                        help='Template for the output path to save the trained model')
     
     # Compute device arguments
     parser.add_argument('--accelerator', type=str, default='cpu', choices=['cpu', 'gpu', 'auto'],
@@ -240,7 +255,7 @@ def main(args: argparse.Namespace):
         accelerator=args.accelerator,
         devices=args.devices,
         enable_checkpointing=False,  # Disable automatic checkpointing
-        logger=False,  # Disable loggers
+        logger=True,  # Disable loggers
         enable_progress_bar=True, # Explicitly enable the progress bar
     )
 
@@ -253,7 +268,8 @@ def main(args: argparse.Namespace):
     model_path = args.output_path_template.format(
         model_type=args.model_type,
         depth=args.depth,
-        seed=args.seed
+        seed=args.seed,
+        epochs= args.epochs,
     )
 
     output_dir = os.path.dirname(model_path)

@@ -81,6 +81,7 @@ class fc_module(nn.Module):
         )
 
     def forward(self, x):
+        
         return self.fc_module(x)
 
 
