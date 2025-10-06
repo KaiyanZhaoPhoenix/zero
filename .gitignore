@@ -133,3 +133,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+realdata.xlsx
+data/pd/My_Test_data_enhanced.csv
+data/pd/My_Training_data_enhanced.csv
+data/processed_data_enhanced/My_Test_data_enhanced.csv
+data/processed_data_enhanced/My_Training_data_enhanced.csv
