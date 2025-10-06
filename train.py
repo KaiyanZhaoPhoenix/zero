@@ -148,7 +148,7 @@ def get_model_config(args: argparse.Namespace) -> tuple:
                 'fc': [64] * 4,
                 'output_size': 3,
                 'activation': ['relu', 'tanh', 'relu', 'tanh'],
-                'dropout_rate': 0.1
+                'dropout_rate': 0.01
             }
         }
     elif args.model_type == 'PhysNet':

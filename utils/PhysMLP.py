@@ -41,19 +41,15 @@ class PhysMLP(pl.LightningModule):
 
         self.mdp_network_params = parameter_dict['mdp_network']
 
-        # sys.exit(f"exit = {self.mdp_network_params}")
-
 
         self.layers_n=4
-
         p=[0,0]
         self.mdp_networks = nn.ModuleList()
         for i in range(self.layers_n):
             self.mdp_networks.append(*self.make_network(network_params=self.mdp_network_params, p=p))
-        # self.mdp_networks = [nn.Sequential(*self.make_network(network_params=self.mdp_network_params)) for i in range(3)]
-        # self.mdp_network = nn.Sequential(*self.make_network(network_params=self.mdp_network_params))
-        # self.mdp_network.apply(xavier_weight_initialisation)
-        # Physics Parameters
+
+
+
         self.c11 = nn.Parameter(torch.tensor([4e-04]))
         self.c12 = nn.Parameter(torch.tensor([3.33e-04]))
         self.c21 = nn.Parameter(torch.tensor([2.0e-05]))
