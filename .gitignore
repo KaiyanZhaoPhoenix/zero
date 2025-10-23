@@ -138,3 +138,4 @@ data/pd/My_Test_data_enhanced.csv
 data/pd/My_Training_data_enhanced.csv
 data/processed_data_enhanced/My_Test_data_enhanced.csv
 data/processed_data_enhanced/My_Training_data_enhanced.csv
+.DS_Store
